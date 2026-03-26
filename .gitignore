@@ -33,3 +33,10 @@ dist-ssr
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Build outputs
+dist/
+.vite/
+
+# TypeScript cache
+*.tsbuildinfo
