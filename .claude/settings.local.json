@@ -1,0 +1,24 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    "ANTHROPIC_AUTH_TOKEN": "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",
+    "ANTHROPIC_API_KEY": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(find . -type d -name test* -o -type d -name *test*)",
+      "Bash(grep -h \"^import\\\\|^from\" .claude/skills/thesis-checker/scripts/*.py)",
+      "Bash(find . -type f -name *.md -o -name *.json -o -name *.yaml -o -name *.yml -o -name *.txt -o -name *.py -o -name *.js -o -name *.ts -o -name package.json)",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
