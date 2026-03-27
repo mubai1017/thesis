@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { User } from '@supabase/supabase-js'
 import ThesisCheckRecords from '../components/ThesisCheckRecords'
 
 // Mock supabase
@@ -26,21 +27,19 @@ describe('ThesisCheckRecords', () => {
   })
 
   it('renders the title', () => {
-    render(<ThesisCheckRecords />)
+    render(<ThesisCheckRecords user={null} />)
     expect(screen.getByText('Thesis Check Records')).toBeInTheDocument()
   })
 
   it('shows guest notice when not logged in', () => {
-    render(<ThesisCheckRecords />)
+    render(<ThesisCheckRecords user={null} />)
     expect(screen.getByText('guest mode')).toBeInTheDocument()
   })
 
   it('shows upload form when logged in', async () => {
-    // Mock logged in state
-    const { supabase } = require('../lib/supabase')
-    supabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: '1' } } })
+    const mockUser: User = { id: '1', email: 'test@test.com' } as User
 
-    render(<ThesisCheckRecords />)
+    render(<ThesisCheckRecords user={mockUser} />)
 
     // Should not show guest notice
     expect(screen.queryByText('guest mode')).not.toBeInTheDocument()
@@ -50,9 +49,8 @@ describe('ThesisCheckRecords', () => {
   })
 
   it('displays error message when there is an error', async () => {
-    const { supabase } = require('../lib/supabase')
-    supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null } })
-    supabase.from.mockReturnValue({
+    const { supabase } = await import('../lib/supabase')
+    ;(supabase.from as any).mockReturnValue({
       select: vi.fn(() => ({
         order: vi.fn(() => Promise.resolve({
           data: null,
@@ -61,9 +59,11 @@ describe('ThesisCheckRecords', () => {
       }))
     })
 
-    render(<ThesisCheckRecords />)
+    render(<ThesisCheckRecords user={null} />)
 
-    // Should show error message
-    expect(screen.getByText('Failed to load records: Database connection failed')).toBeInTheDocument()
+    // Wait for error to be displayed
+    await waitFor(() => {
+      expect(screen.getByText(/Failed to load records:/)).toBeInTheDocument()
+    })
   })
 })

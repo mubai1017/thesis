@@ -127,6 +127,7 @@
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  gap: 1rem;
 }
 
 .records-detail-header h3 {
@@ -134,6 +135,23 @@
   color: #374151;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.show-upload-btn {
+  padding: 0.5rem 1rem;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.show-upload-btn:hover {
+  background-color: #059669;
 }
 
 .records-detail-content {
@@ -158,9 +176,39 @@
   margin-bottom: 2rem;
 }
 
-.upload-section h3 {
-  margin-bottom: 1rem;
+.upload-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.upload-section-header h3 {
+  margin: 0;
   color: #374151;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.close-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.close-upload-btn:hover {
+  background-color: #4b5563;
 }
 
 .upload-form {
@@ -247,6 +295,32 @@
   cursor: not-allowed;
 }
 
+/* Upload Success Actions */
+.upload-success-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.back-to-records-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-to-records-btn:hover {
+  background-color: #2563eb;
+}
+
 /* Records Section (Old) - Removing */
 
 /* Records in Detail Panel */
@@ -283,55 +357,15 @@
   flex-direction: column;
 }
 
-.record-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 1.25rem;
-  transition: background-color 0.2s;
-  gap: 1rem;
-}
-
-.record-header:hover {
-  background-color: #f9fafb;
-}
-
-.record-header:hover {
-  background-color: #f9fafb;
-}
-
-.record-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.file-name {
-  font-weight: 500;
-  color: #111827;
-}
-
-.date {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.record-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
 .expand-btn,
 .delete-btn {
-  padding: 0.375rem 0.75rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .expand-btn {
@@ -574,6 +608,56 @@
   color: #111827;
 }
 
+/* Record Item - Vertical Layout */
+.record-item {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: white;
+  transition: box-shadow 0.2s;
+}
+
+.record-item:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.record-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  gap: 1rem;
+}
+
+.record-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #111827;
+  word-break: break-all;
+}
+
+.date {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.record-footer {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.75rem 1.25rem;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
 .record-content p {
   margin-bottom: 1rem;
   line-height: 1.6;
@@ -624,4 +708,169 @@
   height: 1px;
   background: #f3f4f6;
   margin: 0;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-weight: 500;
+  z-index: 2000;
+  animation: slideIn 0.3s ease-out;
+  max-width: 300px;
+}
+
+.toast-success {
+  background-color: #10b981;
+  color: white;
+  border: 1px solid #059669;
+}
+
+.toast-error {
+  background-color: #ef4444;
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-confirm-modal {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 400px;
+  padding: 2rem;
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.delete-confirm-modal h3 {
+  margin: 0 0 1rem 0;
+  color: #111827;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.delete-confirm-modal p {
+  margin: 0 0 1.5rem 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.delete-confirm-actions button {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.delete-confirm-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.confirm-delete-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.confirm-delete-btn:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+/* Responsive: Ensure buttons are not too small on mobile */
+@media (max-width: 640px) {
+  .record-main {
+    flex-wrap: wrap;
+  }
+
+  .record-footer {
+    justify-content: stretch;
+  }
+
+  .record-footer .delete-btn {
+    width: 100%;
+  }
+
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+    bottom: 1rem;
+  }
+
+  .delete-confirm-modal {
+    margin: 1rem;
+    width: auto;
+  }
+
+  .delete-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .delete-confirm-actions button {
+    width: 100%;
+  }
 }

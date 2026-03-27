@@ -59,7 +59,7 @@ function App() {
               ? 'Upload and view thesis check markdown files. Organize by person with chronological history.'
               : 'View thesis check markdown files. Login to upload new records.'}
           </p>
-          <ThesisCheckRecords />
+          <ThesisCheckRecords user={user} />
         </section>
       </main>
     </div>

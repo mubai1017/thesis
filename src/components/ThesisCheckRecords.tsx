@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
+import type { User } from '@supabase/supabase-js'
 import ReactMarkdown from 'react-markdown'
 import './ThesisCheckRecords.css'
 
 type ThesisCheckRecord = Database['public']['Tables']['thesis_check_records']['Row']
 type ThesisCheckInsert = Database['public']['Tables']['thesis_check_records']['Insert']
 
-export default function ThesisCheckRecords() {
+interface ThesisCheckRecordsProps {
+  user: User | null
+}
+
+export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
   const [records, setRecords] = useState<ThesisCheckRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -16,32 +21,32 @@ export default function ThesisCheckRecords() {
   const [fileContent, setFileContent] = useState('')
   const [fileName, setFileName] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState<ThesisCheckRecord | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [toastType, setToastType] = useState<'success' | 'error'>('success')
+  const [uploadSuccess, setUploadSuccess] = useState(false)
+  const [showUploadForm, setShowUploadForm] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Check auth status and fetch records
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setIsLoggedIn(!!user)
-    }
-    checkAuth()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setIsLoggedIn(!!session?.user)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
+  const isLoggedIn = !!user
 
   // Fetch records on component mount
   useEffect(() => {
     fetchRecords()
   }, [])
+
+  // Auto-clear toast after 3 seconds
+  useEffect(() => {
+    if (!toastMessage) return
+
+    const timer = setTimeout(() => {
+      setToastMessage(null)
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [toastMessage])
 
   // Fetch all records, ordered by created_at desc
   const fetchRecords = async () => {
@@ -132,7 +137,9 @@ export default function ThesisCheckRecords() {
       }
 
       await fetchRecords()
-      alert('Record uploaded successfully!')
+      setUploadSuccess(true)
+      setToastMessage('记录上传成功！')
+      setToastType('success')
     } catch (error: unknown) {
       const err = error as { message: string }
       alert(`Error: ${err.message}`)
@@ -141,10 +148,12 @@ export default function ThesisCheckRecords() {
     }
   }
 
-  // Delete record
-  const handleDelete = async (id: string, fileName: string) => {
-    if (!confirm(`Delete record: ${fileName}?`)) return
+  // Delete record - show custom confirmation first
+  const confirmDelete = (id: string) => {
+    setDeleteConfirmId(id)
+  }
 
+  const executeDelete = async (id: string, fileName: string) => {
     setLoading(true)
     try {
       const { error } = await supabase
@@ -159,13 +168,22 @@ export default function ThesisCheckRecords() {
         handleCloseModal()
       }
 
+      setDeleteConfirmId(null)
+      setToastMessage(`记录 "${fileName}" 已删除`)
+      setToastType('success')
       await fetchRecords()
     } catch (error: unknown) {
       const err = error as { message: string }
-      alert(`Error: ${err.message}`)
+      setToastMessage(`删除失败: ${err.message}`)
+      setToastType('error')
+      setDeleteConfirmId(null)
     } finally {
       setLoading(false)
     }
+  }
+
+  const cancelDelete = () => {
+    setDeleteConfirmId(null)
   }
 
   // Handle expand - open modal with record content
@@ -224,14 +242,22 @@ export default function ThesisCheckRecords() {
       {/* Guest notice */}
       {!isLoggedIn && (
         <div className="guest-notice">
-          ℹ️ You are viewing in <strong>guest mode</strong>. Login to upload new records.
+          ℹ️ You are viewing in <strong>guest mode</strong>. Login to upload new records and delete records.
         </div>
       )}
 
-      {/* Upload Form - Only for logged in users */}
-      {isLoggedIn && (
+      {/* Upload Form - Only for logged in users and when showUploadForm is true */}
+      {isLoggedIn && showUploadForm && (
         <div className="upload-section">
-          <h3>Upload Markdown File</h3>
+          <div className="upload-section-header">
+            <h3>Upload Markdown File</h3>
+            <button
+              className="close-upload-btn"
+              onClick={() => setShowUploadForm(false)}
+            >
+              ← 返回记录列表
+            </button>
+          </div>
           <form onSubmit={handleUpload} className="upload-form">
           <div className="form-group">
             <label htmlFor="file-input">Select .md file</label>
@@ -278,6 +304,19 @@ export default function ThesisCheckRecords() {
             {loading ? 'Uploading...' : 'Upload Record'}
           </button>
         </form>
+        {uploadSuccess && (
+          <div className="upload-success-actions">
+            <button
+              className="back-to-records-btn"
+              onClick={() => {
+                setUploadSuccess(false)
+                setShowUploadForm(false)
+              }}
+            >
+              ← 返回记录列表
+            </button>
+          </div>
+        )}
       </div>
       )}
 
@@ -323,6 +362,14 @@ export default function ThesisCheckRecords() {
               <>
                 <div className="records-detail-header">
                   <h3>{selectedPersonName}'s Records ({selectedPersonRecords.length})</h3>
+                  {isLoggedIn && !showUploadForm && (
+                    <button
+                      className="show-upload-btn"
+                      onClick={() => setShowUploadForm(true)}
+                    >
+                      + Upload New Record
+                    </button>
+                  )}
                 </div>
                 <div className="records-detail-content">
                   <div className="records-list">
@@ -331,31 +378,31 @@ export default function ThesisCheckRecords() {
                         key={record.id}
                         className="record-item"
                       >
-                        <div className="record-header">
+                        <div className="record-main">
                           <div className="record-info">
                             <span className="file-name">{record.file_name}</span>
                             <span className="date">
                               {new Date(record.created_at).toLocaleString('zh-CN')}
                             </span>
                           </div>
-                          <div className="record-actions">
-                            <button
-                              className="expand-btn"
-                              onClick={() => handleExpand(record)}
-                            >
-                              Expand
-                            </button>
-                            {isLoggedIn && (
-                              <button
-                                className="delete-btn"
-                                onClick={() => handleDelete(record.id, record.file_name)}
-                                disabled={loading}
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
+                          <button
+                            className="expand-btn"
+                            onClick={() => handleExpand(record)}
+                          >
+                            Expand
+                          </button>
                         </div>
+                        {isLoggedIn && (
+                          <div className="record-footer">
+                            <button
+                              className="delete-btn"
+                              onClick={() => confirmDelete(record.id)}
+                              disabled={loading}
+                            >
+                              Delete Record
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -382,6 +429,44 @@ export default function ThesisCheckRecords() {
             </div>
             <div className="modal-body">
               <ReactMarkdown>{selectedRecord.file_content}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className={`toast toast-${toastType}`}>
+          {toastMessage}
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="delete-confirm-overlay">
+          <div className="delete-confirm-modal">
+            <h3>确认删除</h3>
+            <p>确定要删除这条记录吗？此操作无法撤销。</p>
+            <div className="delete-confirm-actions">
+              <button
+                className="cancel-btn"
+                onClick={cancelDelete}
+                disabled={loading}
+              >
+                取消
+              </button>
+              <button
+                className="confirm-delete-btn"
+                onClick={() => {
+                  const record = records.find(r => r.id === deleteConfirmId)
+                  if (record) {
+                    executeDelete(record.id, record.file_name)
+                  }
+                }}
+                disabled={loading}
+              >
+                {loading ? '删除中...' : '删除'}
+              </button>
             </div>
           </div>
         </div>
