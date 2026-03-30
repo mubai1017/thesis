@@ -29,6 +29,7 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const [showUploadForm, setShowUploadForm] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [personColorMap, setPersonColorMap] = useState<Record<string, string>>({})
 
   const isLoggedIn = !!user
 
@@ -36,6 +37,19 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
   useEffect(() => {
     fetchRecords()
   }, [])
+
+  // Build person color map from records whenever records change
+  useEffect(() => {
+    const colorMap: Record<string, string> = {}
+    records.forEach(record => {
+      // Keep the color from the most recent record for each person
+      // (records are already sorted by created_at desc)
+      if (!colorMap[record.person_name]) {
+        colorMap[record.person_name] = record.status_color || 'red'
+      }
+    })
+    setPersonColorMap(colorMap)
+  }, [records])
 
   // Auto-clear toast after 3 seconds
   useEffect(() => {
@@ -112,7 +126,8 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
       const newRecord: ThesisCheckInsert = {
         person_name: personName.trim(),
         file_name: fileName.trim(),
-        file_content: fileContent.trim()
+        file_content: fileContent.trim(),
+        status_color: 'red' // 默认为红色
       }
 
       const { error } = await supabase
@@ -218,6 +233,52 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
     ? records.filter(r => r.person_name === selectedPersonName)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     : []
+
+  // Update color for a person (updates their most recent record)
+  const updatePersonColor = async (personName: string, newColor: string) => {
+    if (!isLoggedIn) return
+
+    // Find the most recent record for this person
+    const mostRecentRecord = records
+      .filter(r => r.person_name === personName)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
+
+    if (!mostRecentRecord) {
+      alert('Cannot update color: no records found for this person')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('thesis_check_records')
+        .update({ status_color: newColor })
+        .eq('id', mostRecentRecord.id)
+
+      if (error) throw error
+
+      // Update local state
+      setPersonColorMap(prev => ({ ...prev, [personName]: newColor }))
+      setToastMessage(`颜色已更新为 ${getColorLabel(newColor)}`)
+      setToastType('success')
+    } catch (error: unknown) {
+      const err = error as { message: string }
+      alert(`更新颜色失败: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Get color label in Chinese
+  const getColorLabel = (color: string): string => {
+    const labels: Record<string, string> = {
+      'red': '红色 (严重)',
+      'orange': '橙色 (延迟)',
+      'blue': '蓝色 (正常)',
+      'green': '绿色 (完成)'
+    }
+    return labels[color] || color
+  }
 
   return (
     <div className="thesis-check-records">
@@ -347,7 +408,28 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
                   className={`person-list-item ${selectedPersonName === name ? 'active' : ''}`}
                   onClick={() => setSelectedPersonName(name)}
                 >
-                  <span className="person-name-text">{name}</span>
+                  <div className="person-name-row">
+                    <span className="person-name-text">{name}</span>
+                    {isLoggedIn && (
+                      <select
+                        className="color-picker"
+                        value={personColorMap[name] || 'red'}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => updatePersonColor(name, e.target.value)}
+                      >
+                        <option value="red">红色</option>
+                        <option value="orange">橙色</option>
+                        <option value="blue">蓝色</option>
+                        <option value="green">绿色</option>
+                      </select>
+                    )}
+                    <span
+                      className={`color-badge color-${personColorMap[name] || 'red'}`}
+                      title={getColorLabel(personColorMap[name] || 'red')}
+                    >
+                      ●
+                    </span>
+                  </div>
                   <span className="person-count">
                     {records.filter(r => r.person_name === name).length}
                   </span>

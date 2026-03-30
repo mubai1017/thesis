@@ -25,18 +25,21 @@ export interface Database {
           file_name: string
           file_content: string
           created_at: string
+          status_color: string
         }
         Insert: {
           id?: string
           person_name: string
           file_name: string
           file_content: string
+          status_color?: string
         }
         Update: {
           id?: string
           person_name?: string
           file_name?: string
           file_content?: string
+          status_color?: string
         }
       }
     }

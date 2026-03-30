@@ -40,3 +40,6 @@ dist/
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Vite config (local only)
+vite.config.ts
