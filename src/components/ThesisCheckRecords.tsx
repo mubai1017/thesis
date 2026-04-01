@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
 import type { User } from '@supabase/supabase-js'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import './ThesisCheckRecords.css'
 
 type ThesisCheckRecord = Database['public']['Tables']['thesis_check_records']['Row']
@@ -354,7 +355,7 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
             <label>Preview Content</label>
             <div className="content-preview">
               {fileContent ? (
-                <ReactMarkdown>{fileContent.substring(0, 500) + (fileContent.length > 500 ? '...' : '')}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{fileContent.substring(0, 500) + (fileContent.length > 500 ? '...' : '')}</ReactMarkdown>
               ) : (
                 <span className="placeholder">No content loaded</span>
               )}
@@ -510,7 +511,7 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
               </button>
             </div>
             <div className="modal-body">
-              <ReactMarkdown>{selectedRecord.file_content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedRecord.file_content}</ReactMarkdown>
             </div>
           </div>
         </div>
