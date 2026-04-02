@@ -1319,9 +1319,84 @@
   }
 
   .modal-body {
-    padding: 1.25rem;
-    font-size: 0.9rem;
-    line-height: 1.7;
+    flex: 1; /* Occupy remaining space in modal-content */
+    overflow: hidden; /* Hide overflow, child scroll-container handles it */
+    padding: 0.75rem; /* Reduced padding to allow more space for content */
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Mobile: Scroll container for markdown content to handle wide tables */
+  .markdown-scroll-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    height: 100%;
+    overscroll-behavior: contain;
+    /* Scrollbar styling for mobile */
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+  }
+
+  /* Custom scrollbar for mobile */
+  .markdown-scroll-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .markdown-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .markdown-scroll-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  .markdown-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Table styling inside scroll container */
+  .markdown-scroll-container table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+    display: table;
+  }
+
+  .markdown-scroll-container th,
+  .markdown-scroll-container td {
+    min-width: 120px;
+    white-space: nowrap;
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 0.625rem;
+    text-align: left;
+    display: table-cell;
+  }
+
+  .markdown-scroll-container th {
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .markdown-scroll-container td {
+    background: white;
+    color: #374151;
+  }
+
+  .markdown-scroll-container tr:nth-child(even) td {
+    background: #f9fafb;
+  }
+
+  .markdown-scroll-container tr:hover td {
+    background: #f3f4f6;
   }
 
   .modal-body h1 {
@@ -1371,24 +1446,6 @@
     margin: 0.75rem 0;
   }
 
-  /* Responsive tables in modal - mobile horizontal scroll */
-  .modal-body table {
-    display: block;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 1rem;
-  }
-
-  .modal-body thead,
-  .modal-body tbody,
-  .modal-body th,
-  .modal-body td,
-  .modal-body tr {
-    display: table;
-    width: 100%;
-    box-sizing: border-box;
-  }
 
   .modal-body thead {
     position: sticky;

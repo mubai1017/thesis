@@ -511,7 +511,9 @@ export default function ThesisCheckRecords({ user }: ThesisCheckRecordsProps) {
               </button>
             </div>
             <div className="modal-body">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedRecord.file_content}</ReactMarkdown>
+              <div className="markdown-scroll-container">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedRecord.file_content}</ReactMarkdown>
+              </div>
             </div>
           </div>
         </div>
